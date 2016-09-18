@@ -26,12 +26,17 @@ namespace Ann
         /// <summary>
         /// this neurons position in the layer
         /// </summary>
-        private uint index;
+        private int index;
 
         /// <summary>
         /// gradient of learning
         /// </summary>
         private double gradient;
+
+        /// <summary>
+        /// Which type of neuron this is.
+        /// </summary>
+        private NeuronType neuronType;
 
         /// <summary>
         ///  Initializes a new instance of the <see cref="Neuron" /> class with<see pref="numOutputs"/> outputs and in position <see pref="index"/>
@@ -41,8 +46,11 @@ namespace Ann
         /// number of Neurons in the next layer (excluding bias neurons) 
         /// </param>
         /// <param name="index"> This nodes position in its layer</param>
-        public Neuron(uint numOutputs, uint index)
+        /// <param name="neuronType"> Weather this Neuron is an input, output, bias or hidden neuron</param>
+        public Neuron(int numOutputs, int index, NeuronType neuronType)
         {
+            this.neuronType = neuronType;
+
             this.InitNeuronRand();
             this.OutputValue = this.RandomUnitDouble();
 
@@ -52,7 +60,47 @@ namespace Ann
                 this.OutputWeights[i] = this.RandomUnitDouble();
             }
 
+            this.OutputDeltaWeights = new double[numOutputs];
+
             this.index = index;
+        }
+
+        internal void SetInput(int input)
+        {
+            if (this.neuronType == NeuronType.INPUT)
+            {
+                this.OutputValue = input;
+            }
+            else
+            {
+                Console.WriteLine("Cannot set the input value of neurons that are not NeuronType.INPUT Neurons");
+            }
+        }
+
+        /// <summary>
+        /// Represents the different types of Neurons
+        /// </summary>
+        public enum NeuronType
+        {
+            /// <summary>
+            /// Represents a Neuron that receives direct input.
+            /// </summary>
+            INPUT,
+
+            /// <summary>
+            /// Represents a Neuron that acts as a bias and always has an output of 1.
+            /// </summary>
+            BIAS,
+
+            /// <summary>
+            /// Represents a hidden neuron which is neither an input ,output or bias.
+            /// </summary>
+            HIDDEN,
+
+            /// <summary>
+            /// Represents a Output neuron which will be read for output.
+            /// </summary>
+            OUTPUT
         }
 
         /// <summary>
@@ -80,7 +128,9 @@ namespace Ann
 
             for (int i = 0; i < prevLayer.Length; i++)
             {
-                sum += prevLayer[i].OutputValue * prevLayer[i].OutputWeights[this.index];
+                double output = prevLayer[i].OutputValue;
+                double weight = prevLayer[i].OutputWeights[this.index];
+                sum += output * weight;
             }
 
             this.OutputValue = this.TransferFunction(sum);
@@ -97,13 +147,23 @@ namespace Ann
         }
 
         /// <summary>
-        /// calculates the gradient
+        /// calculates the gradient of a hidden layer
         /// </summary>
         /// <param name="nextLayer">the next layer of nodes in the net</param>
-        private void CalcHiddenGradients(Neuron[] nextLayer)
+        public void CalcHiddenGradients(Neuron[] nextLayer)
         {
             double dow = this.SumDow(nextLayer);
             this.gradient = dow * this.TransferFunctionDerivative(this.OutputValue);
+        }
+
+        /// <summary>
+        /// calculates the gradient of the output layer
+        /// </summary>
+        /// <param name="targetVal">the expected output value</param>
+        public void CalcOutputGradients(double targetVal)
+        {
+            double delta = targetVal - this.OutputValue;
+            this.gradient = delta * this.TransferFunctionDerivative(this.OutputValue);
         }
 
         /// <summary>
@@ -140,7 +200,7 @@ namespace Ann
         /// Updates the previous layers output weights , i.e. this layers input weights
         /// </summary>
         /// <param name="prevLayer"> The previous layer in the Net</param>
-        private void UpdateInputWeights(Neuron[] prevLayer)
+        public void UpdateInputWeights(Neuron[] prevLayer)
         {
             for (int i = 0; i < prevLayer.Length; i++)
             {
