@@ -45,7 +45,12 @@
   <ItemGroup>
     <Compile Include="AnnConfig.cs" />
     <Compile Include="Net.cs" />
-    <Compile Include="Neuron.cs" />
+    <Compile Include="NetChromo.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="Neuron.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Program.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>

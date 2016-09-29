@@ -10,14 +10,20 @@ namespace Ann
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.Serialization;
     using System.Text;
     using System.Threading.Tasks;
 
     /// <summary>
     /// Class represents a single Neuron with in the Neural Net
     /// </summary>
+    [Serializable]
     public class Neuron
     {
+        /*
+         * Variables
+         */
+
         /// <summary>
         /// a static random number generator common to all neurons
         /// </summary>
@@ -37,6 +43,10 @@ namespace Ann
         /// Which type of neuron this is.
         /// </summary>
         private NeuronType neuronType;
+
+        /*
+         * constructors
+         */
 
         /// <summary>
         ///  Initializes a new instance of the <see cref="Neuron" /> class with<see pref="numOutputs"/> outputs and in position <see pref="index"/>
@@ -65,17 +75,9 @@ namespace Ann
             this.index = index;
         }
 
-        internal void SetInput(int input)
-        {
-            if (this.neuronType == NeuronType.INPUT)
-            {
-                this.OutputValue = input;
-            }
-            else
-            {
-                Console.WriteLine("Cannot set the input value of neurons that are not NeuronType.INPUT Neurons");
-            }
-        }
+        /*
+         * ENums
+         */
 
         /// <summary>
         /// Represents the different types of Neurons
@@ -118,6 +120,26 @@ namespace Ann
         /// </summary>
         public double[] OutputDeltaWeights { get; protected set; }
 
+        /*
+         * Methods
+         */
+
+        /// <summary>
+        /// Allows the inputs of Neurons of NeuronType.INPUT to be set
+        /// </summary>
+        /// <param name="input">value to set this neuron to</param>
+        public void SetInput(double input)
+        {
+            if (this.neuronType == NeuronType.INPUT)
+            {
+                this.OutputValue = input;
+            }
+            else
+            {
+                Console.WriteLine("Cannot set the input value of neurons that are not NeuronType.INPUT Neurons");
+            }
+        }
+
         /// <summary>
         /// propagates the inputs (outputs of previous Layer) forward to the output
         /// </summary>
@@ -134,16 +156,6 @@ namespace Ann
             }
 
             this.OutputValue = this.TransferFunction(sum);
-        }
-
-        /// <summary>
-        /// Maps an input value to a value between 0 and 1
-        /// </summary>
-        /// <param name="value">input value for the transfer function</param>
-        /// <returns> a value mapped between -1 and 1 </returns>
-        private double TransferFunction(double value)
-        {
-            return Math.Tanh(value);
         }
 
         /// <summary>
@@ -164,6 +176,36 @@ namespace Ann
         {
             double delta = targetVal - this.OutputValue;
             this.gradient = delta * this.TransferFunctionDerivative(this.OutputValue);
+        }
+
+        /// <summary>
+        /// Updates the previous layers output weights , i.e. this layers input weights
+        /// </summary>
+        /// <param name="prevLayer"> The previous layer in the Net</param>
+        public void UpdateInputWeights(Neuron[] prevLayer)
+        {
+            for (int i = 0; i < prevLayer.Length; i++)
+            {
+                Neuron currNeuron = prevLayer[i];
+
+                double oldDeltaWeight = currNeuron.OutputDeltaWeights[this.index];
+
+                double newDeltaWeight =
+                    (AnnConfig.Eta * currNeuron.OutputValue * this.gradient) + (AnnConfig.Alpha * oldDeltaWeight);
+
+                currNeuron.OutputDeltaWeights[this.index] = newDeltaWeight;
+                currNeuron.OutputWeights[this.index] += newDeltaWeight;
+            }
+        }
+
+        /// <summary>
+        /// Maps an input value to a value between 0 and 1
+        /// </summary>
+        /// <param name="value">input value for the transfer function</param>
+        /// <returns> a value mapped between -1 and 1 </returns>
+        private double TransferFunction(double value)
+        {
+            return Math.Tanh(value);
         }
 
         /// <summary>
@@ -194,26 +236,6 @@ namespace Ann
             }
 
             return sum;
-        }
-
-        /// <summary>
-        /// Updates the previous layers output weights , i.e. this layers input weights
-        /// </summary>
-        /// <param name="prevLayer"> The previous layer in the Net</param>
-        public void UpdateInputWeights(Neuron[] prevLayer)
-        {
-            for (int i = 0; i < prevLayer.Length; i++)
-            {
-                Neuron currNeuron = prevLayer[i];
-
-                double oldDeltaWeight = currNeuron.OutputDeltaWeights[this.index];
-
-                double newDeltaWeight = 
-                    (AnnConfig.Eta * currNeuron.OutputValue * this.gradient) + (AnnConfig.Alpha * oldDeltaWeight);
-
-                currNeuron.OutputDeltaWeights[this.index] = newDeltaWeight;
-                currNeuron.OutputWeights[this.index] += newDeltaWeight;
-            }
         }
 
         /// <summary>
