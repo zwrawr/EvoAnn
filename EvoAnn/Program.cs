@@ -149,7 +149,7 @@ namespace EvoAnn
 
             avg /= inputs.Length;
 
-            return new double[] { 1 / (avg * avg * avg * avg) };
+            return new double[] { Math.Exp(-0.5*(avg * avg)) };
         }
     }
 }
