@@ -46,8 +46,6 @@ namespace Ann
         /*
          * Constructors
          */
-
-        public Net() {}
         
         /// <summary>
         /// Initializes a new instance of the <see cref="Net"/> class
