@@ -43,28 +43,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnnConfig.cs" />
-    <Compile Include="Chromo.cs" />
-    <Compile Include="EvoManager.cs">
+    <Compile Include="Ann\AnnConfig.cs" />
+    <Compile Include="Chromo\Chromo.cs" />
+    <Compile Include="Evo\EvoManager.cs">
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="IChromosonable.cs" />
-    <Compile Include="Net.cs">
+    <Compile Include="Chromo\IChromosonable.cs" />
+    <Compile Include="Ann\Net.cs">
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="NetChromo.cs">
+    <Compile Include="Chromo\NetChromo.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Neuron.cs">
+    <Compile Include="Ann\Neuron.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Program.cs">
+    <Compile Include="Evo\Program.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Simulation.cs" />
+    <Compile Include="Evo\Simulation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
