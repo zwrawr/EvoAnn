@@ -5,7 +5,7 @@
 // </copyright>
 // <author> Zak R. A. West , zakr.a.west@gmail.com , zwrawr@gmail.com </author>
 // =====================================================
-namespace Evo
+namespace EvoAnn
 {
     using System;
     using System.Collections.Generic;
@@ -16,12 +16,9 @@ namespace Evo
     /// <summary>
     /// Class represent the Chromosome information of a Net and is responsible for breading chromosomes
     /// </summary>
-    public class NetChromo
+    public class NetChromo : Chromo
     {
-        /// <summary>
-        /// a static random number generator common to all NetChromos
-        /// </summary>
-        private static Random chromoRand;
+
 
         /// <summary>
         /// The chromosome data that represents a Net
@@ -29,13 +26,23 @@ namespace Evo
         private double[][][] chromoData;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NetChromo"/> class. a 3D array of doubles represents the  
+        /// Initializes a new instance of the <see cref="NetChromo"/> class from a 3D array of doubles represents the Net.  
         /// </summary>
         /// <param name="data">Chromosome data</param>
         public NetChromo(double[][][] data)
         {
+            
             this.chromoData = data;
-            this.InitChromoRand();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NetChromo"/> class from an existing <see cref="NetChromo"> instance.  
+        /// </summary>
+        /// <param name="other">this becomes a clone of other</param>
+        public NetChromo(NetChromo other)
+        {
+
+            this.chromoData = other.chromoData;
         }
 
         /// <summary>
@@ -46,9 +53,14 @@ namespace Evo
         /// <param name="mutationChance">The chance of a mutation happening. [0..1] should be a small value</param>
         /// <param name="mutationRate">How large of a chance will happen to a trait if it mutates [0..1] should be a small value</param>
         /// <returns>A new NetChromo based of the two parent NetChromos</returns>
-        public static NetChromo Breed(NetChromo mother, NetChromo father, double mutationChance, double mutationRate)
+        public override Chromo breed(Chromo father, double mutationChance, double mutationRate)
         {
-            NetChromo child = new NetChromo(mother.chromoData);
+
+            NetChromo _father = (NetChromo)father;
+            NetChromo _mother = this;
+
+            NetChromo child = new NetChromo(_mother);
+
 
             for (int a = 0; a < child.chromoData.Length; a++)
             {
@@ -56,14 +68,16 @@ namespace Evo
                 {
                     for (int c = 0; c < child.chromoData[a][b].Length; c++)
                     {
-                        if (chromoRand.NextDouble() < 0.5)
+                        // half the time the child should have the farthers gene not the mothers
+                        if (ChromoRand.NextDouble() < 0.5)
                         {
-                            child.chromoData[a][b][c] = father.chromoData[a][b][c];
+                            child.chromoData[a][b][c] = _father.chromoData[a][b][c];
                         }
 
-                        if (chromoRand.NextDouble() < mutationChance)
+                        // some of the time we will mutate a gene
+                        if (ChromoRand.NextDouble() < mutationChance)
                         {
-                            child.chromoData[a][b][c] += mutationRate - (2.0 * mutationRate * chromoRand.NextDouble());
+                            child.chromoData[a][b][c] += mutationRate - (2.0 * mutationRate * ChromoRand.NextDouble());
                         }
                     }
                 }
@@ -72,15 +86,11 @@ namespace Evo
             return child;
         }
 
-        /// <summary>
-        /// sets up the random number generator
-        /// </summary>
-        private void InitChromoRand()
+        public double[][][] getChromoData()
         {
-            if (NetChromo.chromoRand == null)
-            {
-                NetChromo.chromoRand = new Random();
-            }
+            return this.chromoData;
         }
+
+
     }
 }

@@ -9,12 +9,11 @@ namespace EvoAnn
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using Ann;
     using System.Xml.Serialization;
-    using System.IO;
 
     /// <summary>
     /// Entry point of the program
@@ -27,26 +26,33 @@ namespace EvoAnn
         /// <param name="args"> command line values that were passed into the program</param>
         public static void Main(string[] args)
         {
-            test1(10000);
+            Test1(10000);
 
-            waitforinput();
+            WaitForInput();
 
-            test2(10000);
+            Test2(10000);
 
-            waitforinput();
+            WaitForInput();
 
-            test3(10000);
+            Test3(10000);
 
-            waitforinput();
+            WaitForInput();
         }
 
-        private static void waitforinput()
+        /// <summary>
+        /// Waits for a key press in the console before returning.
+        /// </summary>
+        private static void WaitForInput()
         {
             Console.WriteLine("Press any key to continue");
             Console.In.ReadLine();
         }
 
-        private static void test1(int runs)
+        /// <summary>
+        /// The first test.
+        /// </summary>
+        /// <param name="runs">Number of times to run.</param>
+        private static void Test1(int runs)
         {
             Console.WriteLine("Test 1 AND inputs");
 
@@ -63,15 +69,20 @@ namespace EvoAnn
 
                 double[] results = net.GetResults();
 
-                net.BackProp(new double[] { Program.and(inputs[0], inputs[1]) });
+                net.BackProp(new double[] { Program.And(inputs[0], inputs[1]) });
 
-                if (i % (runs / 10 ) == 0) Console.WriteLine( "Run " + i + " Error : " + net.Error + " avgError : " + net.RecentAvgError);
+                if (i % (runs / 10) == 0)
+                {
+                    Console.WriteLine("Run " + i + " Error : " + net.Error + " avgError : " + net.RecentAvgError);
+                }
             }
-
         }
 
-
-        private static void test2(int runs)
+        /// <summary>
+        /// The second test.
+        /// </summary>
+        /// <param name="runs">Number of times to run.</param>
+        private static void Test2(int runs)
         {
             Console.WriteLine("\n\rTest 2 positive or negitive ");
 
@@ -87,13 +98,20 @@ namespace EvoAnn
 
                 double[] results = net.GetResults();
 
-                net.BackProp(Program.posneg(inputs[0]) );
+                net.BackProp(Program.PosNeg(inputs[0]));
 
-                if ( i % (runs / 10) == 0  )Console.WriteLine("Run " + i + " Error : " + net.Error + " avgError : " + net.RecentAvgError);
+                if (i % (runs / 10) == 0)
+                {
+                    Console.WriteLine("Run " + i + " Error : " + net.Error + " avgError : " + net.RecentAvgError);
+                }
             }
         }
 
-        private static void test3(int runs)
+        /// <summary>
+        /// The third test.
+        /// </summary>
+        /// <param name="runs">Number of times to run.</param>
+        private static void Test3(int runs)
         {
             Console.WriteLine("\n\rTest 3 average near zero ");
 
@@ -113,32 +131,52 @@ namespace EvoAnn
 
                 double[] results = net.GetResults();
 
-                net.BackProp(Program.avgzero(inputs));
+                net.BackProp(Program.AvgZero(inputs));
 
-                if (i % (runs / 10) == 0) Console.WriteLine("Run " + i + " Error : " + net.Error + " avgError : " + net.RecentAvgError);
+                if (i % (runs / 10) == 0)
+                {
+                    Console.WriteLine("Run " + i + " Error : " + net.Error + " avgError : " + net.RecentAvgError);
+                }
             }
-
         }
 
-        private static double and(double a, double b)
+        /// <summary>
+        /// Computes an and function of two doubles
+        /// </summary>
+        /// <param name="a">the first input.</param>
+        /// <param name="b">the second input.</param>
+        /// <returns>If A and B are grater than 0.5 then it returns 1 else it returns 0.</returns>
+        private static double And(double a, double b)
         {
             if (a > 0.5 && b > 0.5)
             {
                 return 1;
             }
+            
             return -1;
         }
 
-        private static double[] posneg(double i)
+        /// <summary>
+        /// Returns positive and negative based on if i grater than 0.5.
+        /// </summary>
+        /// <param name="i">The input.</param>
+        /// <returns>An array of 1 and -1.</returns>
+        private static double[] PosNeg(double i)
         {
             if (i >= 0.5)
             {
                 return new double[] { 1, -1 };
             }
+
             return new double[] { -1, 1 };
         }
 
-        private static double[] avgzero(double[] inputs)
+        /// <summary>
+        /// Provides a high output when the average of the inputs is near zero.
+        /// </summary>
+        /// <param name="inputs">The inputs to be averaged</param>
+        /// <returns>A high value when the average of the input is zero.</returns>
+        private static double[] AvgZero(double[] inputs)
         {
             double avg = 0;
 
@@ -149,7 +187,7 @@ namespace EvoAnn
 
             avg /= inputs.Length;
 
-            return new double[] { Math.Exp(-0.5*(avg * avg)) };
+            return new double[] { 1 - (avg * avg) };
         }
     }
 }

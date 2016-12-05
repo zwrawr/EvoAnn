@@ -5,7 +5,7 @@
 // </copyright>
 // <author> Zak R. A. West , zakr.a.west@gmail.com , zwrawr@gmail.com </author>
 // =====================================================
-namespace Ann
+namespace EvoAnn
 {
     using System;
     using System.Collections.Generic;
@@ -17,7 +17,7 @@ namespace Ann
     /// <summary>
     /// Class represent the Net structure of an ANN
     /// </summary>
-    public class Net
+    public class Net : IChromosonable
     {
         /*
          * Variables
@@ -64,6 +64,27 @@ namespace Ann
             {
                 Console.WriteLine("Exception: Bad Net topology");
                 throw e;
+            }
+
+            this.CreateNeurons();
+
+            this.recentErrors = new List<double>();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Net"/> class
+        /// </summary>
+        /// <param name="data">preexisting data about this net</param>
+        public Net(double[][][] data)
+        {
+            this.Error = 0;
+            this.RecentAvgError = 0;
+
+            this.topology = new int[data.GetLength(0)];
+
+            for (int i = 0; i < data.GetLength(0); i++)
+            {
+                this.topology[i] = data[i].GetLength(0);
             }
 
             this.CreateNeurons();
@@ -196,10 +217,36 @@ namespace Ann
             }
         }
 
-        public double[][][] getNetWeights() {
+        /// <summary>
+        /// Converts this <see cref="Net"/> into a <see cref="Chromo"/> via the <see cref="IChromosonable"/> interface.
+        /// </summary>
+        /// <returns> A <see cref="Chromo"/> representing this Net.</returns>
+        public Chromo ToChromo()
+        {
+            return new NetChromo(this.GetNetWeights());
+        }
+
+        /// <summary>
+        /// Converts a <see cref="Chromo"/> into a <see cref="Net"/> via the <see cref="IChromosonable"/> interface.
+        /// </summary>
+        /// <param name="chromo"> A <see cref="Chromo"/> representing this Net.</param>
+        /// <returns> A <see cref="Net"/> that the input represented</returns>
+        public object FromChromo(Chromo chromo)
+        {
+            NetChromo netChromo = (NetChromo)chromo;
+            return new Net(netChromo.getChromoData());
+        }
+
+        /// <summary>
+        /// Gets a array of all the weights that determine the behavior of this <see cref="Net"/>.
+        /// </summary>
+        /// <returns>An array of all of this <see cref="Net"/>s weights</returns>
+        private double[][][] GetNetWeights()
+        {
             double[][][] netWeights = new double[this.topology.Length][][];
 
-            for (int a = 0; a < this.topology.Length; a++) {
+            for (int a = 0; a < this.topology.Length; a++)
+            {
                 netWeights[a] = new double[this.topology[a]][];
 
                 for (int b = 0; b < this.topology[a]; b++)
@@ -224,6 +271,24 @@ namespace Ann
                 for (int j = 0; j < this.topology[i]; j++)
                 {
                     this.neurons[i][j] = this.CreateNeuron(i, j);
+                }
+            }
+        }
+
+        /// <summary>
+        /// instantiate all of the neurons in this net from existing data
+        /// </summary>
+        /// <param name="data">Weights that represent this <see cref="Net"/>'s <see cref="Neuron"/>'s weights </param>
+        private void CreateNeurons(double[][][] data)
+        {
+            this.neurons = new Neuron[this.topology.Length][];
+
+            for (int i = 0; i < this.topology.Length; i++)
+            {
+                this.neurons[i] = new Neuron[this.topology[i]];
+                for (int j = 0; j < this.topology[i]; j++)
+                {
+                    this.neurons[i][j] = this.CreateNeuron(i, j, data[i][j]);
                 }
             }
         }
@@ -265,6 +330,47 @@ namespace Ann
             {
                 // must be a non-bias neuron in a hidden layer
                 return new Neuron(this.topology[layer + 1] - 1, index, Neuron.NeuronType.HIDDEN);
+            }
+        }
+
+        /// <summary>
+        /// creates a new neuron with values based off preexisting data
+        /// </summary>
+        /// <param name="layer">Which layer this neuron is in, used to decide if this is an input, hidden or output neuron</param>
+        /// <param name="index">which position this neuron is within it's layer, used to decide if this is a bias neuron</param>
+        /// <param name="weights">The <see cref="Neuron"/>s weights.</param>
+        /// <returns> a new Neuron, with the correct setup to be in layer layer and position index</returns>
+        private Neuron CreateNeuron(int layer, int index, double[] weights)
+        {
+            // last neuron in any layer is a bias neuron
+            if (index == this.topology[layer] - 1)
+            {
+                // check to see if were in the last layer
+                if (layer == this.topology.Length - 1)
+                {
+                    // were in the last layer, the putput layer so we only have one output
+                    return new Neuron(1, index, Neuron.NeuronType.BIAS, weights);
+                }
+                else
+                {
+                    // were not in the output layer so we have as many outputs as the next layer has neurons ( minus one for the BIAS )
+                    return new Neuron(this.topology[layer + 1] - 1, index, Neuron.NeuronType.BIAS, weights);
+                }
+            }
+            else if (layer == 0)
+            {
+                // nodes in the first layer are inputs
+                return new Neuron(this.topology[layer + 1] - 1, index, Neuron.NeuronType.INPUT, weights);
+            }
+            else if (layer == this.topology.Length - 1)
+            {
+                // nodes in the last layer are outputs
+                return new Neuron(1, index, Neuron.NeuronType.OUTPUT, weights);
+            }
+            else
+            {
+                // must be a non-bias neuron in a hidden layer
+                return new Neuron(this.topology[layer + 1] - 1, index, Neuron.NeuronType.HIDDEN, weights);
             }
         }
 

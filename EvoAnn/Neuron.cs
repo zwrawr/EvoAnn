@@ -5,7 +5,7 @@
 // </copyright>
 // <author> Zak R. A. West , zakr.a.west@gmail.com , zwrawr@gmail.com </author>
 // =====================================================
-namespace Ann
+namespace EvoAnn
 {
     using System;
     using System.Collections.Generic;
@@ -62,13 +62,38 @@ namespace Ann
             this.neuronType = neuronType;
 
             this.InitNeuronRand();
-            this.OutputValue = this.RandomUnitDouble();
+            this.OutputValue = Neuron.RandomUnitDouble();
 
             this.OutputWeights = new double[numOutputs];
             for (int i = 0; i < numOutputs; i++)
             {
-                this.OutputWeights[i] = this.RandomUnitDouble();
+                this.OutputWeights[i] = Neuron.RandomUnitDouble();
             }
+
+            this.OutputDeltaWeights = new double[numOutputs];
+
+            this.index = index;
+        }
+
+        /// <summary>
+        ///  Initializes a new instance of the <see cref="Neuron" /> class from preexisting data. 
+        /// </summary>
+        /// <param name="numOutputs">
+        /// The number of outputs this Neurons has which is the same as the 
+        /// number of Neurons in the next layer (excluding bias neurons) 
+        /// </param>
+        /// <param name="index"> This nodes position in its layer</param>
+        /// <param name="neuronType"> Weather this Neuron is an input, output, bias or hidden neuron</param>
+        /// <param name="outputWeights"> the output weights of this neuron</param>
+        public Neuron(int numOutputs, int index, NeuronType neuronType, double[] outputWeights)
+        {
+            this.InitNeuronRand();
+
+            this.neuronType = neuronType;
+
+            this.OutputValue = Neuron.RandomUnitDouble();
+
+            this.OutputWeights = outputWeights;
 
             this.OutputDeltaWeights = new double[numOutputs];
 
@@ -199,6 +224,15 @@ namespace Ann
         }
 
         /// <summary>
+        /// method to get a random double between -1 and 1
+        /// </summary>
+        /// <returns>a random number between -1 and 1</returns>
+        private static double RandomUnitDouble()
+        {
+            return 2.0 * (0.5 - Neuron.neuronRand.NextDouble());
+        }
+
+        /// <summary>
         /// Maps an input value to a value between 0 and 1
         /// </summary>
         /// <param name="value">input value for the transfer function</param>
@@ -247,15 +281,6 @@ namespace Ann
             {
                 Neuron.neuronRand = new Random();
             }
-        }
-
-        /// <summary>
-        /// method to get a random double between -1 and 1
-        /// </summary>
-        /// <returns>a random number between -1 and 1</returns>
-        private double RandomUnitDouble()
-        {
-            return 2.0 * (0.5 - Neuron.neuronRand.NextDouble());
         }
     }
 }

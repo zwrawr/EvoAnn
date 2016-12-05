@@ -5,7 +5,7 @@
 // </copyright>
 // <author> Zak R. A. West , zakr.a.west@gmail.com , zwrawr@gmail.com </author>
 // =====================================================
-namespace Ann
+namespace EvoAnn
 {
     using System;
     using System.Collections.Generic;
